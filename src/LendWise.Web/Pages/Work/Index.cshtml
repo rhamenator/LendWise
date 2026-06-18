@@ -1,0 +1,67 @@
+@page
+@model LendWise.Web.Pages.Work.IndexModel
+@{
+    ViewData["Title"] = "Work";
+}
+
+<section class="page-heading">
+    <div>
+        <p class="eyebrow">Work queue</p>
+        <h1>Follow-ups, documents, and conditions</h1>
+    </div>
+</section>
+
+<form class="filter-bar" method="get">
+    <label class="check-label">
+        <input type="checkbox" name="IncludeCompleted" value="true" checked="@Model.IncludeCompleted" />
+        <span>Include completed</span>
+    </label>
+    <button type="submit">Refresh</button>
+</form>
+
+<section class="table-surface">
+    <table>
+        <thead>
+            <tr>
+                <th>Priority</th>
+                <th>Work</th>
+                <th>Customer</th>
+                <th>Due</th>
+                <th>Assigned</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model.WorkItems)
+            {
+                <tr class="@(item.CompletedAt is null ? "" : "completed")">
+                    <td><span class="priority @item.Priority.ToString().ToLowerInvariant()">@item.Priority</span></td>
+                    <td>
+                        <strong>@item.Title</strong>
+                        <small>@item.Type · @item.Description</small>
+                    </td>
+                    <td>
+                        @if (item.CustomerId is not null)
+                        {
+                            <a asp-page="/Customers/Details" asp-route-id="@item.CustomerId">@item.Customer?.Name</a>
+                        }
+                    </td>
+                    <td>@item.DueAt.ToString("MMM d, yyyy")</td>
+                    <td>@item.AssignedTo</td>
+                    <td>
+                        @if (item.CompletedAt is null)
+                        {
+                            <form method="post" asp-page-handler="Complete" asp-route-id="@item.Id" asp-route-IncludeCompleted="@Model.IncludeCompleted">
+                                <button class="small-action" type="submit">Complete</button>
+                            </form>
+                        }
+                        else
+                        {
+                            <span>@item.CompletedAt.Value.ToString("MMM d")</span>
+                        }
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</section>

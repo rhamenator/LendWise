@@ -1,0 +1,77 @@
+@page "/Customers/{id:int}"
+@model LendWise.Web.Pages.Customers.DetailsModel
+@{
+    ViewData["Title"] = Model.Customer.Name;
+}
+
+<section class="page-heading detail-heading">
+    <div>
+        <p class="eyebrow">@Model.Customer.Segment · @Model.Customer.Status</p>
+        <h1>@Model.Customer.Name</h1>
+        <p>@Model.Customer.Notes</p>
+    </div>
+    <span class="heat @Model.Customer.HeatLevel.ToLowerInvariant()">@Model.Customer.HeatLevel</span>
+</section>
+
+<section class="detail-layout">
+    <div class="workspace-panel">
+        <h2>Contacts</h2>
+        <div class="stack-list">
+            @foreach (var contact in Model.Customer.Contacts)
+            {
+                <div class="stack-row">
+                    <strong>@contact.FullName</strong>
+                    <span>@contact.Role · @contact.ContactType</span>
+                    <small>@contact.Email · @contact.MobilePhone</small>
+                </div>
+            }
+        </div>
+    </div>
+
+    <div class="workspace-panel">
+        <h2>Properties</h2>
+        <div class="stack-list">
+            @foreach (var property in Model.Customer.Properties)
+            {
+                <div class="stack-row">
+                    <strong>@property.Label</strong>
+                    <span>@property.Address1, @property.City, @property.State @property.Zip</span>
+                    <small>@property.PropertyType · @property.EstimatedValue.ToString("C0")</small>
+                </div>
+            }
+        </div>
+    </div>
+
+    <div class="workspace-panel wide">
+        <h2>Loans</h2>
+        <div class="loan-list">
+            @foreach (var loan in Model.Customer.Loans.OrderBy(loan => loan.TargetCloseDate))
+            {
+                <div class="loan-row">
+                    <div>
+                        <strong>@loan.LoanNumber</strong>
+                        <span>@loan.Purpose · @loan.Program</span>
+                    </div>
+                    <span class="stage-chip">@loan.Stage</span>
+                    <span>@loan.Amount.ToString("C0")</span>
+                    <span>@loan.InterestRate.ToString("0.000")%</span>
+                    <span>@loan.TargetCloseDate.ToString("MMM d")</span>
+                </div>
+            }
+        </div>
+    </div>
+
+    <div class="workspace-panel wide">
+        <h2>Open work</h2>
+        <div class="work-list">
+            @foreach (var item in Model.Customer.WorkItems.OrderBy(item => item.CompletedAt != null).ThenBy(item => item.DueAt))
+            {
+                <div class="work-row static">
+                    <span class="priority @item.Priority.ToString().ToLowerInvariant()">@item.Priority</span>
+                    <strong>@item.Title</strong>
+                    <small>@item.Type · @item.DueAt.ToString("MMM d") · @item.AssignedTo</small>
+                </div>
+            }
+        </div>
+    </div>
+</section>

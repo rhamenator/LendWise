@@ -1,0 +1,8 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/LendWise.Web/LendWise.Web.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/LendWise.Tests/LendWise.Tests.csproj" />
+  </Folder>
+</Solution>

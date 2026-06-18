@@ -1,0 +1,88 @@
+@page
+@model IndexModel
+@{
+    ViewData["Title"] = "Dashboard";
+}
+
+<section class="page-heading">
+    <div>
+        <p class="eyebrow">Operations</p>
+        <h1>Pipeline and client work</h1>
+    </div>
+    <a class="primary-action" asp-page="/Customers/Index">Find customer</a>
+</section>
+
+<section class="metric-strip" aria-label="Portfolio metrics">
+    <div class="metric">
+        <span>Customers</span>
+        <strong>@Model.Snapshot.CustomerCount</strong>
+    </div>
+    <div class="metric">
+        <span>Active loans</span>
+        <strong>@Model.Snapshot.ActiveLoanCount</strong>
+    </div>
+    <div class="metric">
+        <span>Pipeline</span>
+        <strong>@Model.Snapshot.PipelineAmount.ToString("C0")</strong>
+    </div>
+    <div class="metric urgent">
+        <span>Overdue work</span>
+        <strong>@Model.Snapshot.OverdueTaskCount</strong>
+    </div>
+</section>
+
+<section class="workspace-grid">
+    <div class="workspace-panel wide">
+        <div class="panel-heading">
+            <h2>Loan stages</h2>
+            <a asp-page="/Loans/Index">Open pipeline</a>
+        </div>
+        <div class="stage-list">
+            @foreach (var stage in Model.Snapshot.StageCounts)
+            {
+                <div class="stage-row">
+                    <span>@stage.Stage</span>
+                    <div class="stage-meter" aria-hidden="true">
+                        <span style="width:@Math.Min(100, stage.Count * 24)%"></span>
+                    </div>
+                    <strong>@stage.Count</strong>
+                    <em>@stage.Amount.ToString("C0")</em>
+                </div>
+            }
+        </div>
+    </div>
+
+    <div class="workspace-panel">
+        <div class="panel-heading">
+            <h2>Due work</h2>
+            <a asp-page="/Work/Index">Open queue</a>
+        </div>
+        <div class="work-list">
+            @foreach (var item in Model.Snapshot.DueWork)
+            {
+                <a class="work-row" asp-page="/Customers/Details" asp-route-id="@item.CustomerId">
+                    <span class="priority @item.Priority.ToString().ToLowerInvariant()">@item.Priority</span>
+                    <strong>@item.Title</strong>
+                    <small>@item.Customer?.Name · @item.DueAt.ToString("MMM d")</small>
+                </a>
+            }
+        </div>
+    </div>
+
+    <div class="workspace-panel">
+        <div class="panel-heading">
+            <h2>Recent activity</h2>
+            <a asp-page="/DataModel/Index">View model</a>
+        </div>
+        <ol class="activity-list">
+            @foreach (var activity in Model.Snapshot.RecentActivity)
+            {
+                <li>
+                    <span>@activity.ActivityType</span>
+                    <strong>@activity.Summary</strong>
+                    <small>@activity.OccurredAt.ToString("MMM d, h:mm tt")</small>
+                </li>
+            }
+        </ol>
+    </div>
+</section>

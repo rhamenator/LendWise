@@ -1,0 +1,63 @@
+@page
+@model LendWise.Web.Pages.DataModel.IndexModel
+@{
+    ViewData["Title"] = "Data Model";
+}
+
+<section class="page-heading">
+    <div>
+        <p class="eyebrow">Data model</p>
+        <h1>Modern shape inferred from the legacy schema</h1>
+    </div>
+</section>
+
+<section class="table-surface">
+    <table>
+        <thead>
+            <tr>
+                <th>Entity</th>
+                <th>Records</th>
+                <th>Purpose</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var table in Model.Snapshot.Tables)
+            {
+                <tr>
+                    <td><strong>@table.Name</strong></td>
+                    <td>@table.Records</td>
+                    <td>@table.Purpose</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</section>
+
+<section class="workspace-grid">
+    <div class="workspace-panel">
+        <h2>Picklists</h2>
+        <div class="stack-list">
+            @foreach (var group in Model.Snapshot.PickLists.GroupBy(option => option.Category))
+            {
+                <div class="stack-row">
+                    <strong>@group.Key</strong>
+                    <span>@string.Join(", ", group.Select(option => option.Value))</span>
+                </div>
+            }
+        </div>
+    </div>
+
+    <div class="workspace-panel">
+        <h2>Relationships</h2>
+        <div class="stack-list">
+            @foreach (var relationship in Model.Snapshot.Relationships)
+            {
+                <div class="stack-row">
+                    <strong>@relationship.RelationshipType</strong>
+                    <span>@relationship.PrimaryEntityType #@relationship.PrimaryEntityId to @relationship.SecondaryEntityType #@relationship.SecondaryEntityId</span>
+                    <small>@relationship.Notes</small>
+                </div>
+            }
+        </div>
+    </div>
+</section>

@@ -1,0 +1,43 @@
+@page
+@model LendWise.Web.Pages.Loans.IndexModel
+@{
+    ViewData["Title"] = "Pipeline";
+}
+
+<section class="page-heading">
+    <div>
+        <p class="eyebrow">Loan pipeline</p>
+        <h1>Active and dormant lending work</h1>
+    </div>
+</section>
+
+<form class="filter-bar" method="get">
+    <label>
+        <span>Stage</span>
+        <select name="Stage">
+            <option value="">All stages</option>
+            @foreach (var stage in Model.Stages)
+            {
+                <option value="@stage" selected="@(Model.Stage == stage)">@stage</option>
+            }
+        </select>
+    </label>
+    <button type="submit">Apply</button>
+</form>
+
+<section class="pipeline-board">
+    @foreach (var group in Model.Loans.GroupBy(loan => loan.Stage).OrderBy(group => group.Key))
+    {
+        <div class="pipeline-column">
+            <h2>@group.Key <span>@group.Count()</span></h2>
+            @foreach (var loan in group)
+            {
+                <a class="pipeline-item" asp-page="/Customers/Details" asp-route-id="@loan.CustomerId">
+                    <strong>@loan.Customer?.Name</strong>
+                    <span>@loan.LoanNumber · @loan.Purpose</span>
+                    <small>@loan.Amount.ToString("C0") · Close @loan.TargetCloseDate.ToString("MMM d")</small>
+                </a>
+            }
+        </div>
+    }
+</section>

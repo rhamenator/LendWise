@@ -1,0 +1,71 @@
+@page
+@model LendWise.Web.Pages.Customers.IndexModel
+@{
+    ViewData["Title"] = "Customers";
+}
+
+<section class="page-heading">
+    <div>
+        <p class="eyebrow">Customers</p>
+        <h1>Client and household search</h1>
+    </div>
+</section>
+
+<form class="filter-bar" method="get">
+    <label>
+        <span>Search</span>
+        <input name="Query" value="@Model.Query" placeholder="Name, email, loan number" />
+    </label>
+    <label>
+        <span>Heat</span>
+        <select name="HeatLevel">
+            <option value="">Any</option>
+            @foreach (var heat in Model.HeatLevels)
+            {
+                <option value="@heat" selected="@(Model.HeatLevel == heat)">@heat</option>
+            }
+        </select>
+    </label>
+    <label>
+        <span>Status</span>
+        <select name="Status">
+            <option value="">Any</option>
+            @foreach (var status in Model.Statuses)
+            {
+                <option value="@status" selected="@(Model.Status == status)">@status</option>
+            }
+        </select>
+    </label>
+    <button type="submit">Apply</button>
+</form>
+
+<section class="table-surface">
+    <table>
+        <thead>
+            <tr>
+                <th>Customer</th>
+                <th>Segment</th>
+                <th>Status</th>
+                <th>Heat</th>
+                <th>Stage</th>
+                <th>Open work</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var customer in Model.Customers)
+            {
+                <tr>
+                    <td>
+                        <a asp-page="/Customers/Details" asp-route-id="@customer.Id">@customer.Name</a>
+                        <small>@customer.ContactCount contact(s), @customer.LoanCount loan(s)</small>
+                    </td>
+                    <td>@customer.Segment</td>
+                    <td>@customer.Status</td>
+                    <td><span class="heat @customer.HeatLevel.ToLowerInvariant()">@customer.HeatLevel</span></td>
+                    <td>@customer.CurrentStage</td>
+                    <td>@customer.OpenTaskCount</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</section>
