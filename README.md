@@ -8,6 +8,10 @@ LendWise is a ground-up mortgage relationship and loan pipeline application. It 
 - `tests/LendWise.Tests/` - xUnit coverage for seeded data, customer search, dashboard metrics, and work queue behavior
 - `docs/` - stack, development, and operating notes
 
+The loan pipeline now includes document-readiness checklists and receipt
+tracking. See `docs\PARITY_AUDIT.md` for the Cano capability audit and remaining
+modernization boundary.
+
 ## Quick Start
 
 ```powershell

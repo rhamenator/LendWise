@@ -37,6 +37,7 @@
                     <span>@loan.LoanNumber · @loan.Purpose</span>
                     <small>@loan.Amount.ToString("C0") · Close @loan.TargetCloseDate.ToString("MMM d")</small>
                 </a>
+                <a asp-page="/Loans/Documents" asp-route-loanId="@loan.Id">Document checklist</a>
             }
         </div>
     }

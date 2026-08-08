@@ -117,6 +117,57 @@ public class PortfolioService(LendWiseDbContext db)
             .ToListAsync();
     }
 
+    public async Task<LoanDocumentChecklist?> GetDocumentChecklistAsync(int loanId)
+    {
+        var loan = await db.Loans
+            .Include(item => item.Customer)
+            .Include(item => item.Documents)
+            .FirstOrDefaultAsync(item => item.Id == loanId);
+        if (loan is null)
+        {
+            return null;
+        }
+
+        var now = DateTime.UtcNow;
+        var documents = loan.Documents
+            .OrderBy(document => document.Status)
+            .ThenBy(document => document.DocumentType)
+            .ToList();
+        var blocking = documents.Count(document =>
+            document.Status is LoanDocumentStatus.Requested or LoanDocumentStatus.Rejected
+            || (document.ExpiresAt.HasValue && document.ExpiresAt.Value < now));
+
+        return new LoanDocumentChecklist(
+            loan,
+            documents,
+            documents.Count(document => document.Status == LoanDocumentStatus.Verified),
+            blocking);
+    }
+
+    public async Task<bool> MarkDocumentReceivedAsync(int documentId)
+    {
+        var document = await db.LoanDocuments
+            .Include(item => item.Loan)
+            .FirstOrDefaultAsync(item => item.Id == documentId);
+        if (document is null || document.Status is LoanDocumentStatus.Verified or LoanDocumentStatus.Waived)
+        {
+            return false;
+        }
+
+        document.Status = LoanDocumentStatus.Received;
+        document.ReceivedAt = DateTime.UtcNow;
+        db.ActivityHistory.Add(new ActivityHistory
+        {
+            OccurredAt = DateTime.UtcNow,
+            ActivityType = "Document",
+            Summary = $"{document.DocumentType} received for {document.Loan?.LoanNumber}",
+            Result = "Received",
+            Description = "Document moved into the verification queue."
+        });
+        await db.SaveChangesAsync();
+        return true;
+    }
+
     public async Task<List<WorkItem>> GetWorkQueueAsync(bool includeCompleted)
     {
         var workItems = db.WorkItems
@@ -166,6 +217,7 @@ public class PortfolioService(LendWiseDbContext db)
                 new("Property", await db.Properties.CountAsync(), "Addresses and subject properties for current and historical loan work."),
                 new("Loan", await db.Loans.CountAsync(), "Pipeline records, programs, rates, target close dates, and stage tracking."),
                 new("TrustDeed", await db.TrustDeeds.CountAsync(), "Loan security detail, lender, lien position, amount, rate, and term."),
+                new("LoanDocument", await db.LoanDocuments.CountAsync(), "Requested, received, verified, rejected, waived, and expiring loan documents."),
                 new("WorkItem", await db.WorkItems.CountAsync(), "Follow-ups, document requests, appointments, conditions, and import review tasks."),
                 new("PickListOption", await db.PickListOptions.CountAsync(), "Controlled lookup values from the legacy picklist pattern."),
                 new("Relationship", await db.Relationships.CountAsync(), "Generic links between records, preserving the legacy Related table idea."),
@@ -210,3 +262,9 @@ public record DataModelSnapshot(
     List<PickListOption> PickLists);
 
 public record TableSummary(string Name, int Records, string Purpose);
+
+public record LoanDocumentChecklist(
+    Loan Loan,
+    List<LoanDocument> Documents,
+    int VerifiedCount,
+    int BlockingCount);

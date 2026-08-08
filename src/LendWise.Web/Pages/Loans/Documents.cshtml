@@ -1,0 +1,51 @@
+@page
+@using LendWise.Web.Models
+@model LendWise.Web.Pages.Loans.DocumentsModel
+@{
+    ViewData["Title"] = "Document checklist";
+}
+
+<section class="page-heading">
+    <div>
+        <p class="eyebrow">Loan documents</p>
+        <h1>@Model.Checklist.Loan.LoanNumber · @Model.Checklist.Loan.Customer?.Name</h1>
+        <p>@Model.Checklist.VerifiedCount verified · @Model.Checklist.BlockingCount blocking</p>
+    </div>
+</section>
+
+<section class="data-card">
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Document</th>
+                <th>Status</th>
+                <th>Requested</th>
+                <th>Received</th>
+                <th>Notes</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+        @foreach (var document in Model.Checklist.Documents)
+        {
+            <tr>
+                <td>@document.DocumentType</td>
+                <td>@document.Status</td>
+                <td>@document.RequestedAt.ToString("MMM d, yyyy")</td>
+                <td>@document.ReceivedAt?.ToString("MMM d, yyyy")</td>
+                <td>@document.Notes</td>
+                <td>
+                    @if (document.Status is LoanDocumentStatus.Requested or LoanDocumentStatus.Rejected)
+                    {
+                        <form method="post" asp-page-handler="Receive">
+                            <input type="hidden" name="loanId" value="@Model.Checklist.Loan.Id" />
+                            <input type="hidden" name="documentId" value="@document.Id" />
+                            <button type="submit">Mark received</button>
+                        </form>
+                    }
+                </td>
+            </tr>
+        }
+        </tbody>
+    </table>
+</section>

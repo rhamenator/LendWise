@@ -252,6 +252,22 @@ public static class DemoDataSeeder
 
         db.Customers.AddRange(rivera, chen, patel, moretti);
 
+        rivera.Loans[0].Documents.AddRange([
+            Document("Bank statements", LoanDocumentStatus.Requested, -8, null, "May statement page 3 is still required."),
+            Document("Purchase agreement", LoanDocumentStatus.Verified, -20, -19),
+            Document("Income verification", LoanDocumentStatus.Received, -12, -3)
+        ]);
+        chen.Loans[0].Documents.AddRange([
+            Document("Current rent roll", LoanDocumentStatus.Received, -6, -2),
+            Document("Property insurance", LoanDocumentStatus.Requested, -6, null)
+        ]);
+        patel.Loans[0].Documents.AddRange([
+            Document("Income verification", LoanDocumentStatus.Verified, -5, -4),
+            Document("Asset statements", LoanDocumentStatus.Requested, -3, null)
+        ]);
+        moretti.Loans[0].Documents.Add(
+            Document("Rate authorization", LoanDocumentStatus.Waived, -80, null, "File is dormant."));
+
         db.Relationships.AddRange(
             new Relationship
             {
@@ -316,6 +332,24 @@ public static class DemoDataSeeder
             Result = result,
             Description = description,
             OccurredAt = occurredAt
+        };
+    }
+
+    private static LoanDocument Document(
+        string documentType,
+        LoanDocumentStatus status,
+        int requestedDays,
+        int? receivedDays,
+        string? notes = null)
+    {
+        return new LoanDocument
+        {
+            DocumentType = documentType,
+            Status = status,
+            RequestedAt = SeedNow.AddDays(requestedDays),
+            ReceivedAt = receivedDays.HasValue ? SeedNow.AddDays(receivedDays.Value) : null,
+            VerifiedAt = status == LoanDocumentStatus.Verified ? SeedNow.AddDays(receivedDays ?? requestedDays) : null,
+            Notes = notes
         };
     }
 }

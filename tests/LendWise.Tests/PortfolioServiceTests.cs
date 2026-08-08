@@ -63,6 +63,24 @@ public class PortfolioServiceTests
         Assert.True(await fixture.Db.ActivityHistory.AnyAsync(activity => activity.Summary.Contains("completed")));
     }
 
+    [Fact]
+    public async Task Document_checklist_identifies_blockers_and_records_receipt()
+    {
+        await using var fixture = await TestFixture.CreateAsync();
+        var document = await fixture.Db.LoanDocuments.FirstAsync(item => item.Status == LoanDocumentStatus.Requested);
+
+        var before = await fixture.Service.GetDocumentChecklistAsync(document.LoanId);
+        var changed = await fixture.Service.MarkDocumentReceivedAsync(document.Id);
+        var after = await fixture.Service.GetDocumentChecklistAsync(document.LoanId);
+
+        Assert.NotNull(before);
+        Assert.True(before.BlockingCount > 0);
+        Assert.True(changed);
+        Assert.NotNull(after);
+        Assert.Equal(before.BlockingCount - 1, after.BlockingCount);
+        Assert.True(await fixture.Db.ActivityHistory.AnyAsync(activity => activity.ActivityType == "Document"));
+    }
+
     private sealed class TestFixture : IAsyncDisposable
     {
         private readonly SqliteConnection connection;

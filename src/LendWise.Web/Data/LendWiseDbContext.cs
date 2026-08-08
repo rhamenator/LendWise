@@ -10,6 +10,7 @@ public class LendWiseDbContext(DbContextOptions<LendWiseDbContext> options) : Db
     public DbSet<Property> Properties => Set<Property>();
     public DbSet<Loan> Loans => Set<Loan>();
     public DbSet<TrustDeed> TrustDeeds => Set<TrustDeed>();
+    public DbSet<LoanDocument> LoanDocuments => Set<LoanDocument>();
     public DbSet<WorkItem> WorkItems => Set<WorkItem>();
     public DbSet<PickListOption> PickListOptions => Set<PickListOption>();
     public DbSet<Relationship> Relationships => Set<Relationship>();
@@ -57,6 +58,12 @@ public class LendWiseDbContext(DbContextOptions<LendWiseDbContext> options) : Db
             .HasMany(loan => loan.TrustDeeds)
             .WithOne(trustDeed => trustDeed.Loan)
             .HasForeignKey(trustDeed => trustDeed.LoanId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<Loan>()
+            .HasMany(loan => loan.Documents)
+            .WithOne(document => document.Loan)
+            .HasForeignKey(document => document.LoanId)
             .OnDelete(DeleteBehavior.Cascade);
 
         modelBuilder.Entity<PickListOption>()

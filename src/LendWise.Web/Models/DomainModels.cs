@@ -30,6 +30,15 @@ public enum WorkItemType
     ImportReview
 }
 
+public enum LoanDocumentStatus
+{
+    Requested,
+    Received,
+    Verified,
+    Rejected,
+    Waived
+}
+
 public class Customer
 {
     public int Id { get; set; }
@@ -145,6 +154,26 @@ public class Loan
     public DateTime CreatedAt { get; set; }
 
     public List<TrustDeed> TrustDeeds { get; set; } = [];
+    public List<LoanDocument> Documents { get; set; } = [];
+}
+
+public class LoanDocument
+{
+    public int Id { get; set; }
+    public int LoanId { get; set; }
+    public Loan? Loan { get; set; }
+
+    [MaxLength(96)]
+    public required string DocumentType { get; set; }
+
+    public LoanDocumentStatus Status { get; set; }
+    public DateTime RequestedAt { get; set; }
+    public DateTime? ReceivedAt { get; set; }
+    public DateTime? VerifiedAt { get; set; }
+    public DateTime? ExpiresAt { get; set; }
+
+    [MaxLength(512)]
+    public string? Notes { get; set; }
 }
 
 public class TrustDeed
