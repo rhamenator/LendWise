@@ -1,3 +1,7 @@
+<p align="center">
+  <img src=".github/assets/logo.png" alt="LendWise logo" width="220">
+</p>
+
 # LendWise
 
 LendWise is a ground-up mortgage relationship and loan pipeline application. It is built as a modern ASP.NET Core Razor Pages app with Entity Framework Core, SQLite-backed local demo data, and automated tests.
